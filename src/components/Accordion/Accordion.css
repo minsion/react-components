@@ -5,8 +5,17 @@
 .accordion-item.expanded {
   display: block;
 }
-
-.accordion-button {
-  display: block;
-  width: 100%;
+.wrapper-accordion{
+  border: 1px solid #d9d9d9;
+  .item{
+    min-height: 40px;
+    line-height: 40px;
+    border-bottom: 1px solid #d9d9d9;
+    .accordion-label {
+      display: block;
+      width: 100%;
+      border-radius: 4px;
+      padding: 10px;
+    }
+  }
 }

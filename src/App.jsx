@@ -26,10 +26,10 @@ function App() {
         <h3>Accordion</h3>
         <Accordion defaultIndex="1" onItemClick={console.log}>
           <AccordionItem label="A" index="1">
-            Lorem ipsum
+            AAAAAA
           </AccordionItem>
           <AccordionItem label="B" index="2">
-            Dolor sit amet
+            BBBBBB
           </AccordionItem>
         </Accordion>
       </div>

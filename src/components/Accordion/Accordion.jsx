@@ -1,23 +1,23 @@
-import React from 'react';
+import { useState } from 'react';
 import './Accordion.css';
 
 export const AccordionItem = ({ label, isCollapsed, handleClick, children }) => {
   return (
-    <>
-      <button className="accordion-button" onClick={handleClick}>
+    <div className='item'>
+      <div className="accordion-label" onClick={handleClick}>
         {label}
-      </button>
+      </div>
       <div
         className={`accordion-item ${isCollapsed ? 'collapsed' : 'expanded'}`}
         aria-expanded={isCollapsed}
       >
         {children}
       </div>
-    </>
+    </div>
   );
 };
 export const Accordion = ({ defaultIndex, onItemClick, children }) => {
-  const [bindIndex, setBindIndex] = React.useState(defaultIndex);
+  const [bindIndex, setBindIndex] = useState(defaultIndex);
 
   const changeItem = itemIndex => {
     if (typeof onItemClick === 'function') onItemClick(itemIndex);
@@ -26,7 +26,7 @@ export const Accordion = ({ defaultIndex, onItemClick, children }) => {
   const items = children.filter(item => item.type.name === 'AccordionItem');
 
   return (
-    <>
+    <div className='wrapper-accordion'>
       {items.map(({ props }) => (
         <AccordionItem
           key={props.index}
@@ -36,6 +36,6 @@ export const Accordion = ({ defaultIndex, onItemClick, children }) => {
           children={props.children}
         />
       ))}
-    </>
+    </div>
   );
 };

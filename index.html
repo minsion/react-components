@@ -4,10 +4,166 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script type="module" src="/src/main.jsx"></script>
     <title>Vite + React</title>
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
+    <div id="modal-root"></div>
+    <script>
+    let arr = [1, 1, 2, 3, 2, 1, 4, NaN, NaN, true, true, null, null,  undefined, undefined, {name2: 123, age: 12}, {name1: 123}, () => {console.log(999)}, () => {} ]
+    let obj = {};
+    for (let i = 0; i < arr.length; i++) {
+      let item = arr[i]
+      if (obj[item] !== undefined) {
+        arr.splice(i, 1);
+        i--; // 解决删除元素后，数组塌陷问题
+        continue;
+      }
+      obj[item] = item
+    }
+    arr = [...new Set(arr)]
+    console.log(arr)
+
+    let arrObj = [
+      { name: "小红", id: 1 },
+      { name: "小橙", id: 1 },
+      { name: "小黄", id: 4 },
+      { name: "小绿", id: 3 },
+      { name: "小青", id: 1 },
+      { name: "小蓝", id: 4 }
+    ];
+    const map = new Map();
+    let filterArr = arrObj.filter(item => !map.has(item.id) && map.set(item.id, item))
+    console.log(filterArr)
+
+
+    function firstPromise(promiseFn){
+      let canUse = true;
+      return function() {
+        if (canUse) {
+          canUse = false
+          return promiseFn((resolve, reject) => {
+            resolve()
+          })
+        } else {
+          return promiseFn().then(() => {
+            return;
+          })
+        }
+      }
+    }
+    //示例
+    let count = 1;
+    let promiseFn = () => new Promise(res => {
+      window.setTimeout(() => {
+        res(count++)
+      })
+    })
+    let firstFn = firstPromise(promiseFn);
+    // firstFn().then(console.log) // 1
+    // firstFn().then(console.log) // 无输出
+    // firstFn().then(console.log) // 无输出
+
+
+    class BaseEvent {
+      constructor(){
+        this.handlerFn = {}
+      }
+      bind(eName, callback) {
+        if(!this.handlerFn[eName]) {
+          this.handlerFn[eName] = []
+        }
+        this.handlerFn[eName].push(callback)
+      }
+      onceBind(eName, callback) {
+        // this.bind(eName, this._onceWrap(eName, callback, this));
+      }
+      trigger(eName, params) {
+        this.handlerFn[eName] && this.handlerFn[eName].forEach(func => {
+          func.call(this, params);
+        })
+      }
+      unbind(eName) {
+        if(this.handlerFn[eName]) {
+          this.handlerFn[eName] = []
+        }
+      }
+    }
+    const loader = new BaseEvent()
+    loader.bind('loader', (e) => {console.log(e.data)}) // 注册事件
+    loader.trigger('loader', {data: 'tom'}) // 触发事件
+    loader.unbind('loader') // 取消注册
+    loader.trigger('loader', {data: 'mary'}) //再次触发事件，应没有事件处理程序
+    
+    // loader.onceBind('loader', (e) => {console.log(e.data)}) // 注册事件
+    // loader.trigger('loader', {data: 'mary'}) //再次触发事件，应没有事件处理程序
+
+
+    class EventEmitter {
+      constructor() {
+        this.events = {};
+      }
+
+      on(type, handler) {
+        if (!this.events[type]) {
+          this.events[type] = [];
+        }
+        this.events[type].push(handler);
+      }
+
+      off(type, handler) {
+        if (!this.events[type]) {
+          return;
+        }
+        this.events[type] = this.events[type].filter(item => {
+          return item !== handler
+        });
+      }
+
+      emit(type, ...args) {
+        this.events[type].forEach((item) => {
+          Reflect.apply(item, this, args);
+        });
+      }
+
+      once(type, handler) {
+        this.on(type, this._onceWrap(type, handler, this));
+      }
+
+      _onceWrap(type, handler, target) {
+        const state = { fired: false, handler, type , target};
+        const wrapFn = this._onceWrapper.bind(state);
+        state.wrapFn = wrapFn;
+        return wrapFn;
+      }
+
+      _onceWrapper(...args) {
+        if (!this.fired) {
+          this.fired = true;
+          Reflect.apply(this.handler, this.target, args);
+          this.target.off(this.type, this.wrapFn);
+        }
+      }
+    }
+    // 初始化
+    const ee = new EventEmitter();
+    const Fn = (event) =>{
+      console.log(event && event.data);
+    }
+    // 注册事件
+    ee.on('eat', Fn);
+    // 触发事件
+    ee.emit('eat', {data: '🍎'});
+    // ee.off('eat', Fn);
+    ee.emit('eat', {data: '🍌'});
+
+    // 注册一次事件
+    ee.once('drink', (e) => { console.log(e.data) });
+    // 触发事件
+    ee.emit('drink', {data: '橙汁'});
+    ee.emit('drink', {data: '椰汁'});
+
+    </script>
   </body>
 </html>

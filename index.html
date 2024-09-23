@@ -128,7 +128,17 @@
       }
 
       once(type, handler) {
-        this.on(type, this._onceWrap(type, handler, this));
+        // this.on(type, this._onceWrap(type, handler, this));
+        if (!this.events[type]) {
+					this.events[type] = [];
+				}
+
+				this.events[type].push(handler);
+        if (this.events[type]) {
+          console.log(666, this.events[type])
+          this.events[type] = this.events[type].filter((eventFn) => eventFn !== handler);
+        }
+        
       }
 
       _onceWrap(type, handler, target) {

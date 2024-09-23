@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+	<script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js"></script>
+	<script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+</head>
+<body>
+	<h2>x-handlebars-template</h2>
+	<div id="useInfo"></div>
+	<script id="person" type="text/x-handlebars-template">
+		<p>{{ firstName }} {{ lastName }}</p>
+	</script>
+	<h2>EventEmitter</h2>
+	请输入：<input type="text" placeholder="请输入" />
+	<h1></h1>
+	<button onclick="handleSubmit()">提交</button>
+	<script>
+		var person = {
+			firstName: "Betty",
+			lastName: "White"
+		}
+
+		var templateScript = $('#person').html();
+		var template = Handlebars.compile(templateScript);
+		$('#useInfo').append(template(person));
+
+		class EventEmitter {
+			constructor() {
+				this.events = {};
+			}
+
+			emit(eventName, data) {
+				const event = this.events[eventName];
+				if (event) {
+					event.forEach((fn) => {
+						fn.call(null, data);
+					});
+				}
+			}
+
+			subscribe(eventName, fn) {
+				if (!this.events[eventName]) {
+					this.events[eventName] = [];
+				}
+
+				this.events[eventName].push(fn);
+				return () => {
+					this.events[eventName] = this.events[eventName].filter((eventFn) => fn !== eventFn);
+				};
+			}
+		}
+
+		let input = document.querySelector('input[type="text"]');
+		let h1 = document.querySelector('h1');
+
+		input.addEventListener('input', () => {
+			emitter.emit('event:name-changed', { name: input.value });
+		});
+
+		let emitter = new EventEmitter();
+		emitter.subscribe('event:name-changed', (data) => {
+			h1.innerHTML = `Your name is: ${data.name}`;
+		});
+		const handleSubmit = () => {
+			console.log('提交数据', input.value)
+		}
+	</script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Accordion, AccordionItem } from './components/Accordion/Accordion';
 import ChildComponent from './components/ChildComponent';
 import Dialog from './components/Dialog/Dialog';
@@ -10,6 +10,17 @@ function App() {
   const [dialogVisible, setDialogVisible] = useState(false);
   const [dialogVisible2, setDialogVisible2] = useState(false);
   const [data, setData] = useState({})
+  const htmlRef = useRef();
+  let html = `
+    <div>This wil be rendered</div>
+    <script>
+      console.log('testing')
+    </script>
+  `
+  const parseHTML = (htmlStr) => {
+    htmlStr = htmlStr?.replace(/<script\b[^>]*>/g,'&lt;script&gt;')?.replace(/<\/script>/g,'&lt;script&gt;')
+    return htmlStr;
+  }
   const handleClick = useCallback(() => {
     window.location.href = data.linkUrl
   }, [data])
@@ -45,6 +56,7 @@ function App() {
     }
     setData(res)
   }, [])
+
   return (
     <>
       <button onClick={handleClick}>{data.name}</button>
@@ -82,6 +94,7 @@ function App() {
         <button onClick={() => setDialogVisible2(true)}>show dialog222 </button>
         {dialogVisible2 && <Dialog {...dialogProps2} />}
       </div>
+      <div dangerouslySetInnerHTML={{__html: parseHTML(html)}}></div>
     </>
   )
 }

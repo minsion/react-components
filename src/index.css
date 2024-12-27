@@ -42,3 +42,6 @@ button:hover {
 .wrapper-tag-input{
   width: 600px;
 }
+.select-hidden.ant-select-dropdown{
+  display: none;
+}

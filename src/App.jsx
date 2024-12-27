@@ -1,15 +1,27 @@
+import { Select } from 'antd';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Accordion, AccordionItem } from './components/Accordion/Accordion';
 import ChildComponent from './components/ChildComponent';
+import ComposeTable from './components/ComposeTable';
 import Dialog from './components/Dialog/Dialog';
 import Modal from './components/Modal/Modal';
+import SelectModal from './components/SelectModal';
 import TagInput from './components/TagInput/TagInput';
+import TreeTable from './components/TreeTable';
 
 function App() {
   const [isModal, setModal] = useState(false);
   const [dialogVisible, setDialogVisible] = useState(false);
   const [dialogVisible2, setDialogVisible2] = useState(false);
-  const [data, setData] = useState({})
+  const [data, setData] = useState({});
+  const [selectModalVisible, setSelectModalVisible] = useState(false);
+  const options = [];
+  for (let i = 10; i < 36; i++) {
+    options.push({
+      value: i.toString(36) + i,
+      label: i.toString(36) + i,
+    });
+  }
   const htmlRef = useRef();
   let html = `
     <div>This wil be rendered</div>
@@ -57,8 +69,32 @@ function App() {
     setData(res)
   }, [])
 
+for (let i = 10; i < 36; i++) {
+  options.push({
+    value: i.toString(36) + i,
+    label: i.toString(36) + i,
+  });
+}
+  const handleChange = () => {
+    setSelectModalVisible(true);
+  }
+  const handleCancel = () => {
+    setSelectModalVisible(false);
+  }
   return (
     <>
+      <h3>SelectModal</h3>
+      <Select
+        popupClassName='select-hidden'
+        defaultValue="a1"
+        onClick={handleChange}
+        style={{ width: 200 }}
+      />
+      <SelectModal visible={selectModalVisible} onCancel={handleCancel} />
+      <br />
+      <br />
+      <ComposeTable />
+      <TreeTable />
       <button onClick={handleClick}>{data.name}</button>
       <ChildComponent data={{name: 'mary'}} />
       <div className='wrapper-tag-input'>

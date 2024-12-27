@@ -1,0 +1,8 @@
+.select-modal{
+  .content {
+    display: flex;
+    .left{
+      width: 500px;
+    }
+  }
+}

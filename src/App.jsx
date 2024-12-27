@@ -66,9 +66,11 @@ function App() {
     for (var i = 0; i < 7; i++) {
       tempWeekArr.push(dayjs().startOf('week').add(i, 'day').format("YYYY-MM-DD"))
     }
-    console.log(666, tempWeekArr);
+    console.log(tempWeekArr)
+    // ['2024-12-22', '2024-12-23', '2024-12-24', '2024-12-25', '2024-12-26', '2024-12-27', '2024-12-28']
     return tempWeekArr;
   }
+
   useEffect(() => {
     const res = {
       name: '跳转',

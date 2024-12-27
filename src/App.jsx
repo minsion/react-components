@@ -1,4 +1,5 @@
 import { Select } from 'antd';
+import dayjs from 'dayjs';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Accordion, AccordionItem } from './components/Accordion/Accordion';
 import ChildComponent from './components/ChildComponent';
@@ -60,15 +61,23 @@ function App() {
     onCancel: () => setDialogVisible2(false),
     onOk: () => setDialogVisible2(false),
   }
-  
+  const getCurrentWeek = () => {
+    let tempWeekArr = [];
+    for (var i = 0; i < 7; i++) {
+      tempWeekArr.push(dayjs().startOf('week').add(i, 'day').format("YYYY-MM-DD"))
+    }
+    console.log(666, tempWeekArr);
+    return tempWeekArr;
+  }
   useEffect(() => {
     const res = {
       name: '跳转',
       linkUrl: 'http://www.baidu.com'
     }
     setData(res)
+    getCurrentWeek();
   }, [])
-
+  
 for (let i = 10; i < 36; i++) {
   options.push({
     value: i.toString(36) + i,

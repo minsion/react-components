@@ -123,6 +123,8 @@ const SelectModal = (props) => {
     console.log(999,currentItem, getCheckedNodes(currentItem));
     setCheckedItem(currentItemChildren)
   }, [])
+
+
   
   return (
     <div>

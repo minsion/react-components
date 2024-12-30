@@ -66,9 +66,20 @@ function App() {
     for (var i = 0; i < 7; i++) {
       tempWeekArr.push(dayjs().startOf('week').add(i, 'day').format("YYYY-MM-DD"))
     }
-    console.log(tempWeekArr)
     // ['2024-12-22', '2024-12-23', '2024-12-24', '2024-12-25', '2024-12-26', '2024-12-27', '2024-12-28']
     return tempWeekArr;
+  }
+  const isBetweenTime = (currentDate, timeQuantum) => {
+    let isBetween = true;
+    let currentTime = new Date(currentDate);
+    let startTime = new Date(timeQuantum[0]);
+    let endTime = new Date(timeQuantum[1]);
+    let t1 = currentTime.getTime() - startTime.getTime();
+    let t2 = currentTime.getTime() - endTime.getTime();
+    if (t1 < 0 || t2 > 0) {
+      isBetween = false;
+    } 
+    return isBetween;
   }
 
   useEffect(() => {
@@ -101,6 +112,8 @@ for (let i = 10; i < 36; i++) {
         onClick={handleChange}
         style={{ width: 200 }}
       />
+      <br />
+      <br />
       <SelectModal visible={selectModalVisible} onCancel={handleCancel} />
       <br />
       <br />
@@ -125,7 +138,7 @@ for (let i = 10; i < 36; i++) {
       </div>
       <div className='wrapper-tag-input'>
         <h3>Accordion</h3>
-        <Accordion defaultIndex="1" onItemClick={console.log}>
+        <Accordion defaultIndex="1">
           <AccordionItem label="A" index="1">
             AAAAAA
           </AccordionItem>

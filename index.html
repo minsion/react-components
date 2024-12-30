@@ -23,7 +23,7 @@
       obj[item] = item
     }
     arr = [...new Set(arr)]
-    console.log(arr)
+    // console.log(arr)
 
     let arrObj = [
       { name: "小红", id: 1 },
@@ -35,7 +35,7 @@
     ];
     const map = new Map();
     let filterArr = arrObj.filter(item => !map.has(item.id) && map.set(item.id, item))
-    console.log(filterArr)
+    // console.log(filterArr)
 
 
     function firstPromise(promiseFn){
@@ -135,7 +135,7 @@
 
 				this.events[type].push(handler);
         if (this.events[type]) {
-          console.log(666, this.events[type])
+          // console.log(666, this.events[type])
           this.events[type] = this.events[type].filter((eventFn) => eventFn !== handler);
         }
         
@@ -159,7 +159,7 @@
     // 初始化
     const ee = new EventEmitter();
     const Fn = (event) =>{
-      console.log(event && event.data);
+      // console.log(event && event.data);
     }
     // 注册事件
     ee.on('eat', Fn);

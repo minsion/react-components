@@ -1,16 +1,18 @@
-import { Select } from 'antd';
+
+import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
+import { Form, Input, Modal, Select, Space } from 'antd';
 import dayjs from 'dayjs';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Accordion, AccordionItem } from './components/Accordion/Accordion';
 import ChildComponent from './components/ChildComponent';
 import ComposeTable from './components/ComposeTable';
 import Dialog from './components/Dialog/Dialog';
-import Modal from './components/Modal/Modal';
 import SelectModal from './components/SelectModal';
 import TagInput from './components/TagInput/TagInput';
 import TreeTable from './components/TreeTable';
 
 function App() {
+  const [urlForm] = Form.useForm();
   const [isModal, setModal] = useState(false);
   const [dialogVisible, setDialogVisible] = useState(false);
   const [dialogVisible2, setDialogVisible2] = useState(false);
@@ -103,8 +105,43 @@ for (let i = 10; i < 36; i++) {
   const handleCancel = () => {
     setSelectModalVisible(false);
   }
+  const onFinish = async () => {
+    const values = await urlForm.validateFields();
+    console.log(666, values);
+  }
   return (
     <>
+      <div className='wrapper-tag-input'>
+        <h3>Modal</h3>
+        <button onClick={() => {setModal(true); urlForm.setFieldValue({names: []})}}>Click Here</button>
+        <Modal
+          open={isModal}
+          title="Modal Title"
+          footer={<button onClick={onFinish}>Confirm</button>}
+          onClose={() => setModal(false)}
+        >
+          <Form name="dynamic_form_item" form={urlForm}initialValues={{ urlItems: [{}] }}>
+            <Form.List name="urlItems">
+              {(fields, { add, remove }, { errors }) => (
+                <>
+                  {fields.map(({ key, name}, index) => (
+                    <Space key={key} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
+                      <Form.Item
+                        name={[name, 'fileName']}
+                        rules={[{ required: true, message: '请输入' }]}
+                      >
+                        <Input style={{width: '300px'}} placeholder="请输入" />
+                      </Form.Item>
+                      {fields.length > 1 ? <MinusCircleOutlined onClick={() => remove(name)} /> : null}
+                      {fields.length - index === 1 ? <PlusOutlined onClick={() => add()} /> : null}
+                    </Space>
+                  ))}
+                </>
+              )}
+            </Form.List>
+          </Form>
+        </Modal>
+      </div>
       <h3>SelectModal</h3>
       <Select
         popupClassName='select-hidden'
@@ -125,17 +162,7 @@ for (let i = 10; i < 36; i++) {
         <h3>TagInput</h3>
         <TagInput tags={['Nodejs', 'MongoDB']} />
       </div>
-      <div className='wrapper-tag-input'>
-        <h3>Modal</h3>
-        <button onClick={() => setModal(true)}>Click Here</button>
-        <Modal
-          isVisible={isModal}
-          title="Modal Title"
-          content={<p>Add your content here</p>}
-          footer={<button onClick={() => setModal(false)}>Confirm</button>}
-          onClose={() => setModal(false)}
-        />
-      </div>
+      
       <div className='wrapper-tag-input'>
         <h3>Accordion</h3>
         <Accordion defaultIndex="1">

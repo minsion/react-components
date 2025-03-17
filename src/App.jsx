@@ -1,6 +1,6 @@
 
-import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
-import { Form, Input, Modal, Select, Space } from 'antd';
+import { CloseOutlined, MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
+import { Button, Card, Form, Input, Modal, Select, Space } from 'antd';
 import dayjs from 'dayjs';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Accordion, AccordionItem } from './components/Accordion/Accordion';
@@ -13,11 +13,13 @@ import TreeTable from './components/TreeTable';
 
 function App() {
   const [urlForm] = Form.useForm();
+  const [dynamicForm] = Form.useForm();
   const [isModal, setModal] = useState(false);
   const [dialogVisible, setDialogVisible] = useState(false);
   const [dialogVisible2, setDialogVisible2] = useState(false);
   const [data, setData] = useState({});
   const [selectModalVisible, setSelectModalVisible] = useState(false);
+  const [groupData, setGroupData] = useState(['20']);
   const options = [];
   for (let i = 10; i < 36; i++) {
     options.push({
@@ -107,10 +109,108 @@ for (let i = 10; i < 36; i++) {
   }
   const onFinish = async () => {
     const values = await urlForm.validateFields();
+  }
+  const handleGroup = (val) => {
+    console.log(999, val, groupData);
+  }
+  const handleDynamicSubmit = async () => {
+    const values = await dynamicForm.validateFields();
     console.log(666, values);
   }
   return (
     <>
+        <Select
+          mode="multiple"
+          size='small'
+          placeholder="Please select"
+          style={{
+            width: '200px',
+            marginBottom: 20
+          }}
+          value={groupData}
+          options={[
+            {label: '开发', value: '10'},
+            {label: '其他', value: '20'},
+          ]}
+          onSelect={handleGroup}
+          onChange={(val) => {
+            setGroupData(val);
+          }}
+        />
+      <div className='dynamic_form'>
+        <Form
+          form={dynamicForm}
+          name="dynamic_form_complex"
+          style={{
+            maxWidth: 600,
+          }}
+          autoComplete="off"
+          initialValues={{
+            items: [{list: [{}]}],
+          }}
+        >
+          {console.log(888, groupData)}
+
+          <Form.List name="items">
+            {(fields, { add, remove }) => (
+              <div
+                style={{
+                  display: 'flex',
+                  rowGap: 16,
+                  flexDirection: 'column',
+                }}
+              >
+                {fields.map((field) => (
+                  <Card
+                    size="small"
+                    title={`Item ${field.name + 1}`}
+                    key={field.key}
+                    extra={
+                      <CloseOutlined
+                        onClick={() => {
+                          remove(field.name);
+                        }}
+                      />
+                    }
+                  >
+                    <Form.Item label="List">
+                      <Form.List name={[field.name, 'list']}>
+                        {(subFields, subOpt) => (
+                          <div
+                            style={{
+                              display: 'flex',
+                              flexDirection: 'column',
+                              rowGap: 16,
+                            }}
+                          >
+                            {subFields.map((subField, subIndex) => (
+                              <Space key={subField.key}>
+                                <Form.Item noStyle name={[subField.name, 'first']}>
+                                  <Input placeholder="first" />
+                                </Form.Item>
+                                <Form.Item noStyle name={[subField.name, 'second']}>
+                                  <Input placeholder="second" />
+                                </Form.Item>
+                                {subFields.length > 1 ? <MinusCircleOutlined onClick={() => subOpt.remove(subField.name)} /> : null}
+                                {subFields.length - subIndex === 1 ? <PlusOutlined onClick={() => subOpt.add()} /> : null}
+                              </Space>
+                            ))}
+                          </div>
+                        )}
+                      </Form.List>
+                    </Form.Item>
+                  </Card>
+                ))}
+
+                <Button type="dashed" onClick={() => add({list: [{}]})} block>
+                  + Add Item
+                </Button>
+              </div>
+            )}
+          </Form.List>
+        </Form>
+        <button onClick={handleDynamicSubmit}>提交</button>
+      </div>
       <div className='wrapper-tag-input'>
         <h3>Modal</h3>
         <button onClick={() => {setModal(true); urlForm.setFieldValue({names: []})}}>Click Here</button>
@@ -118,7 +218,7 @@ for (let i = 10; i < 36; i++) {
           open={isModal}
           title="Modal Title"
           footer={<button onClick={onFinish}>Confirm</button>}
-          onClose={() => setModal(false)}
+          onCancel={() => setModal(false)}
         >
           <Form name="dynamic_form_item" form={urlForm}initialValues={{ urlItems: [{}] }}>
             <Form.List name="urlItems">

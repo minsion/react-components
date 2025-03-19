@@ -1,6 +1,6 @@
 
 import { CloseOutlined, MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
-import { Button, Card, Form, Input, Modal, Select, Space } from 'antd';
+import { Button, Card, DatePicker, Form, Input, Modal, Select, Space, message } from 'antd';
 import dayjs from 'dayjs';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Accordion, AccordionItem } from './components/Accordion/Accordion';
@@ -19,7 +19,9 @@ function App() {
   const [dialogVisible2, setDialogVisible2] = useState(false);
   const [data, setData] = useState({});
   const [selectModalVisible, setSelectModalVisible] = useState(false);
-  const [groupData, setGroupData] = useState(['20']);
+  const [groupData, setGroupData] = useState([
+    {label: '其他', value: '20', list: [{name: 0, key: 0, isListField: true, fieldKey: 0}]}
+  ]);
   const options = [];
   for (let i = 10; i < 36; i++) {
     options.push({
@@ -110,107 +112,156 @@ for (let i = 10; i < 36; i++) {
   const onFinish = async () => {
     const values = await urlForm.validateFields();
   }
-  const handleGroup = (val) => {
-    console.log(999, val, groupData);
+  const handleOnSelet = (val) => {
+    setGroupData([...groupData, Object.assign(val, {list: [{name: 0, key: 0}]})])
+  }
+  const handleOnDeselect = (val) => {
+    const filterResult = groupData.filter(item => item.key !== val.key)
+    setGroupData(filterResult)
   }
   const handleDynamicSubmit = async () => {
     const values = await dynamicForm.validateFields();
     console.log(666, values);
   }
+  const handleAdd = (val, callback, data) => {
+    console.log(111, val, data)
+    setGroupData([...groupData, val])
+    callback(data)
+  }
+  const getDaysDiffBetweenDates = (startDateString, endDateString) => {
+    const startDate = new Date(startDateString);
+    const endDate = new Date(endDateString);
+    return (endDate - startDate) / (24 * 60 * 60 * 1000);
+  }
   return (
     <>
-        <Select
-          mode="multiple"
-          size='small'
-          placeholder="Please select"
-          style={{
-            width: '200px',
-            marginBottom: 20
-          }}
-          value={groupData}
-          options={[
-            {label: '开发', value: '10'},
-            {label: '其他', value: '20'},
-          ]}
-          onSelect={handleGroup}
-          onChange={(val) => {
-            setGroupData(val);
-          }}
-        />
-      <div className='dynamic_form'>
-        <Form
-          form={dynamicForm}
-          name="dynamic_form_complex"
-          style={{
-            maxWidth: 600,
-          }}
-          autoComplete="off"
-          initialValues={{
-            items: [{list: [{}]}],
-          }}
-        >
-          {console.log(888, groupData)}
-
-          <Form.List name="items">
-            {(fields, { add, remove }) => (
-              <div
-                style={{
-                  display: 'flex',
-                  rowGap: 16,
-                  flexDirection: 'column',
-                }}
-              >
-                {fields.map((field) => (
-                  <Card
-                    size="small"
-                    title={`Item ${field.name + 1}`}
-                    key={field.key}
-                    extra={
-                      <CloseOutlined
-                        onClick={() => {
-                          remove(field.name);
-                        }}
-                      />
-                    }
+        <div className='wrapper-dynamic-form'>
+          <div className='dynamic_form'>
+            <Form
+              form={dynamicForm}
+              name="dynamic_form_complex"
+              style={{
+                maxWidth: 600,
+              }}
+              autoComplete="off"
+              initialValues={{
+                items: [{list: [{}]}],
+              }}
+            >
+              <Form.List name="items">
+                {(fields, { add, remove }) => (
+                  <div
+                    style={{
+                      display: 'flex',
+                      rowGap: 16,
+                      flexDirection: 'column',
+                    }}
                   >
-                    <Form.Item label="List">
-                      <Form.List name={[field.name, 'list']}>
-                        {(subFields, subOpt) => (
-                          <div
-                            style={{
-                              display: 'flex',
-                              flexDirection: 'column',
-                              rowGap: 16,
+                    {fields?.map((field, index) => (
+                      <Card
+                        size="small"
+                        title={`${field.name} 分组`}
+                        key={field.key}
+                        extra={
+                          <CloseOutlined
+                            onClick={() => {
+                              remove(field.name);
                             }}
-                          >
-                            {subFields.map((subField, subIndex) => (
-                              <Space key={subField.key}>
-                                <Form.Item noStyle name={[subField.name, 'first']}>
-                                  <Input placeholder="first" />
-                                </Form.Item>
-                                <Form.Item noStyle name={[subField.name, 'second']}>
-                                  <Input placeholder="second" />
-                                </Form.Item>
-                                {subFields.length > 1 ? <MinusCircleOutlined onClick={() => subOpt.remove(subField.name)} /> : null}
-                                {subFields.length - subIndex === 1 ? <PlusOutlined onClick={() => subOpt.add()} /> : null}
-                              </Space>
-                            ))}
+                          />
+                        }
+                      >
+                        <Form.Item>
+                          <Form.List name={[field.name, 'list']}>
+                            {(subFields, subOpt, get) => (
+                              <div
+                                style={{
+                                  display: 'flex',
+                                  flexDirection: 'column',
+                                  rowGap: 16,
+                                }}
+                              >
+                                {subFields?.map((subField, subIndex) => (
+                                  <Space key={subField.key}>
+                                    <Form.Item noStyle name={[subField.name, 'planStartTime']} rules={[{required: true, message: '请选择'}]}>
+                                      <DatePicker
+                                        format={'YYYY-MM-DD'}
+                                        onChange={(val) => {
+                                          const tempEndVal = dynamicForm.getFieldValue(['items',field.name, 'list', subField.name, 'planEndTime']);
+                                          const endVal = dayjs(tempEndVal).format('YYYY-MM-DD');
+                                          const startVal = dayjs(val).format('YYYY-MM-DD');
+                                          const diffDay = getDaysDiffBetweenDates(startVal, endVal);
+                                          if(tempEndVal && diffDay < 0) {
+                                            dynamicForm.setFieldValue(['items', field.name, 'list', subField.name, 'planStartTime'], 0);
+                                            dynamicForm.setFieldValue(['items', field.name, 'list', subField.name, 'planDay'], 0);
+                                            message.error('开始时间不能大于结束时间')
+                                            return;
+                                          }
+                                          tempEndVal && dynamicForm.setFieldValue(['items', field.name, 'list', subField.name, 'planDay'], diffDay || 0)
+                                        }}
+                                      />
+                                    </Form.Item>
+                                    <Form.Item noStyle name={[subField.name, 'planEndTime']}>
+                                      <DatePicker
+                                        format={'YYYY-MM-DD'}
+                                        onChange={(val) => {
+                                          const tempStartVal =  dynamicForm.getFieldValue(['items',field.name, 'list', subField.name, 'planStartTime'])
+                                          const startVal = dayjs(tempStartVal).format('YYYY-MM-DD');
+                                          const endVal = dayjs(val).format('YYYY-MM-DD');
+                                          const diffDay = getDaysDiffBetweenDates(startVal, endVal);
+                                          if(tempStartVal && diffDay < 0) {
+                                            dynamicForm.setFieldValue(['items', field.name, 'list', subField.name, 'planEndTime'], 0);
+                                            dynamicForm.setFieldValue(['items', field.name, 'list', subField.name, 'planDay'], 0);
+                                            message.error('结束时间不能小于开始时间')
+                                            return;
+                                          }
+                                          tempStartVal && dynamicForm.setFieldValue(['items', field.name, 'list', subField.name, 'planDay'], diffDay || 0)
+                                        }}
+                                      />
+                                    </Form.Item>
+                                    <Form.Item noStyle name={[subField.name, 'planDay']} rules={[{required: true}]}>
+                                      <Input />
+                                    </Form.Item>
+                                    {subFields.length > 1 ? <MinusCircleOutlined onClick={() => subOpt.remove(subField.name)} /> : null}
+                                    {subFields.length - subIndex === 1 ? <PlusOutlined onClick={() => subOpt.add()} /> : null}
+                                  </Space>
+                                ))}
+                              </div>
+                            )}
+                          </Form.List>
+                        </Form.Item>
+                        {index === 0 && (
+                          <div className="select-btn">
+                            <Select
+                              mode="multiple"
+                              size='small'
+                              placeholder="Please select"
+                              style={{
+                                width: '200px',
+                                marginBottom: 20
+                              }}
+                              value={groupData}
+                              labelInValue
+                              options={[
+                                {label: '开发', value: '10'},
+                                {label: '其他', value: '20'},
+                              ]}
+                              onSelect={(val) => handleAdd(val, add, {list: [{}]})}
+                              onDeselect={handleOnDeselect}
+                            />
                           </div>
                         )}
-                      </Form.List>
-                    </Form.Item>
-                  </Card>
-                ))}
-
-                <Button type="dashed" onClick={() => add({list: [{}]})} block>
-                  + Add Item
-                </Button>
-              </div>
-            )}
-          </Form.List>
-        </Form>
-        <button onClick={handleDynamicSubmit}>提交</button>
-      </div>
+                      </Card>
+                    ))}
+                  
+                  </div>
+                )}
+              </Form.List>
+            </Form>
+            <div style={{margin: 20}}>
+            <Button type='primary' onClick={handleDynamicSubmit}>提交</Button>
+            </div>
+          </div>
+        </div>
       <div className='wrapper-tag-input'>
         <h3>Modal</h3>
         <button onClick={() => {setModal(true); urlForm.setFieldValue({names: []})}}>Click Here</button>

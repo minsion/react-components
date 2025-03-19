@@ -45,3 +45,11 @@ button:hover {
 .select-hidden.ant-select-dropdown{
   display: none;
 }
+.wrapper-dynamic-form{
+  position: relative;
+  margin-top: 100px;
+}
+.select-btn {
+  position: absolute;
+  top: -50px;
+}

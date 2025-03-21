@@ -1,6 +1,6 @@
 
 import { CloseOutlined, MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
-import { Button, Card, DatePicker, Form, Input, Modal, Select, Space, message } from 'antd';
+import { Button, Card, DatePicker, Form, Input, Modal, Select, Space, Table, message } from 'antd';
 import dayjs from 'dayjs';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Accordion, AccordionItem } from './components/Accordion/Accordion';
@@ -20,7 +20,7 @@ function App() {
   const [data, setData] = useState({});
   const [selectModalVisible, setSelectModalVisible] = useState(false);
   const [groupData, setGroupData] = useState([
-    {label: '其他', value: '20', list: [{name: 0, key: 0, isListField: true, fieldKey: 0}]}
+    {label: '其他', value: '30', list: [{}]}
   ]);
   const options = [];
   for (let i = 10; i < 36; i++) {
@@ -112,13 +112,7 @@ for (let i = 10; i < 36; i++) {
   const onFinish = async () => {
     const values = await urlForm.validateFields();
   }
-  const handleOnSelet = (val) => {
-    setGroupData([...groupData, Object.assign(val, {list: [{name: 0, key: 0}]})])
-  }
-  const handleOnDeselect = (val) => {
-    const filterResult = groupData.filter(item => item.key !== val.key)
-    setGroupData(filterResult)
-  }
+
   const handleDynamicSubmit = async () => {
     const values = await dynamicForm.validateFields();
     console.log(666, values);
@@ -133,8 +127,53 @@ for (let i = 10; i < 36; i++) {
     const endDate = new Date(endDateString);
     return (endDate - startDate) / (24 * 60 * 60 * 1000);
   }
+  const handleOnSelet = (val) => {
+    setGroupData([...groupData, Object.assign(val, {list: [{name: 0, key: 0}]})])
+  }
+  const handleOnDeselect = (val) => {
+    const filterResult = groupData.filter(item => item.key !== val.key)
+    setGroupData(filterResult)
+  }
+
+  const taskLineList = [
+    {
+      group: {label: '会议', value: '10'},
+      list: [
+        {name: 'tom', age: 11},
+        {name: 'mary', age: 12}
+      ]
+    },
+    {
+      group: {label: '开发', value: '20'},
+      list: [
+        {name: 'tom2', age: 13},
+        {name: 'mary2', age: 14}
+      ]
+    }
+  ]
+  const resultGroup = [];
+  for (let i = 0; i < taskLineList.length; i++) {
+    const item = taskLineList[i];
+    const tempList = [{name: item.group.label, type: 'group'}, ...item.list]
+    resultGroup.push(...tempList)
+  }
+  const columns = [
+    {
+      title: 'Name',
+      dataIndex: 'name',
+      render: (text, record) => <span style={{fontSize: record?.type === 'group' ? '20px' : '12px'}}>{text}</span>,
+      onCell: (record, index) => {
+        return  {colSpan: record?.type === 'group' ? 1 : null}
+      },
+    },
+    {
+      title: 'Age',
+      dataIndex: 'age',
+    },
+  ];
   return (
     <>
+        <Table columns={columns} dataSource={resultGroup}/>
         <div className='wrapper-dynamic-form'>
           <div className='dynamic_form'>
             <Form
@@ -242,8 +281,9 @@ for (let i = 10; i < 36; i++) {
                               value={groupData}
                               labelInValue
                               options={[
-                                {label: '开发', value: '10'},
-                                {label: '其他', value: '20'},
+                                {label: '会议', value: '10'},
+                                {label: '开发', value: '20'},
+                                {label: '其他', value: '30'},
                               ]}
                               onSelect={(val) => handleAdd(val, add, {list: [{}]})}
                               onDeselect={handleOnDeselect}
